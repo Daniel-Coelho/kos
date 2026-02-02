@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  cpf       String   @unique
+  name      String
+  phone     String?
+  nickname  String?
+  password  String
+  role      String   @default("USER") // USER, ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participations Participation[]
+  transactions   Transaction[]
+  adminLogs      AdminLog[]
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String   // "Jogo Bronze", "Jogo Prata", etc.
+  entryFee    Decimal
+  stripePriceId String? // ID do Preço no Stripe (price_...)
+  prizePool   Decimal  @default(0)
+  status      String   @default("OPEN") // OPEN, ACTIVE, COMPLETED
+  
+  participations Participation[]
+}
+
+model Participation {
+  id        String   @id @default(cuid())
+  userId    String
+  groupId   String
+  status    String   @default("ALIVE") // ALIVE, ELIMINATED
+  errors    Int      @default(0) // 0 or 1. If 2 -> Eliminated (unless repescagem)
+  repescagemUsed Boolean @default(false)
+  joinedAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  group     Group    @relation(fields: [groupId], references: [id])
+  picks     Pick[]
+}
+
+model Round {
+  id        String   @id @default(cuid())
+  number    Int      // 1 to 19
+  deadline  DateTime // Locks picks after this time
+  status    String   @default("SCHEDULED") // SCHEDULED, OPEN, LOCKED, COMPLETED
+
+  matches   Match[]
+  picks     Pick[]
+}
+
+model Match {
+  id        String   @id @default(cuid())
+  roundId   String
+  homeTeam  String
+  awayTeam  String
+  homeScore Int?
+  awayScore Int?
+  result    String?  // HOME_WIN, AWAY_WIN, DRAW
+  startTime DateTime
+
+  homeClubId String?
+  awayClubId String?
+  homeClub   Club?    @relation("HomeMatch", fields: [homeClubId], references: [id])
+  awayClub   Club?    @relation("AwayMatch", fields: [awayClubId], references: [id])
+
+  stadium    String?
+
+  round     Round    @relation(fields: [roundId], references: [id])
+}
+
+model Pick {
+  id              String   @id @default(cuid())
+  participationId String
+  roundId         String
+  team            String
+  status          String   @default("PENDING") // PENDING, SURVIVED, DIED
+  createdAt       DateTime @default(now())
+
+  participation   Participation @relation(fields: [participationId], references: [id])
+  round           Round         @relation(fields: [roundId], references: [id])
+
+  @@unique([participationId, roundId]) // One pick per round per participation
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Decimal
+  type      String   // ENTRY, REBUUY
+  status    String   // PENDING, COMPLETED, FAILED
+  stripeId  String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Club {
+  id        String   @id @default(cuid())
+  name      String
+  shortName String?
+  logoUrl   String?
+  
+  homeMatches Match[] @relation("HomeMatch")
+  awayMatches Match[] @relation("AwayMatch")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  action    String
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  admin     User     @relation(fields: [adminId], references: [id])
+}
