@@ -23,6 +23,10 @@ export default async function GroupDetailPage(props: PageProps) {
 
     if (!group) return notFound();
 
+    const totalParticipations = group.participations.length;
+    const totalRepescagens = group.participations.filter(p => p.repescagemUsed).length;
+    const prizePool = (totalParticipations + totalRepescagens) * Number(group.entryFee) * 0.875;
+
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <div className="bg-white p-6 rounded-lg shadow flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -34,7 +38,7 @@ export default async function GroupDetailPage(props: PageProps) {
                     <div>
                         <p className="text-xs text-gray-500 uppercase">Premiação</p>
                         <p className="text-2xl font-bold text-green-600">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(group.prizePool))}
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(prizePool))}
                         </p>
                     </div>
                     <div>

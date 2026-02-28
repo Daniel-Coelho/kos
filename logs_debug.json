@@ -1,0 +1,92 @@
+[
+  {
+    "id": "cmlsglat70006tuppbokvhu2m",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "SCHEDULE_MATCH",
+    "details": "Scheduled match in round cmlsgkijf0000tupp86k5od0n: Botafogo-RJ vs Vitória",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-18T20:02:39.739Z"
+  },
+  {
+    "id": "cmlsgkil60002tupp4d9j6s44",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_ROUND",
+    "details": "Created round: 4",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-18T20:02:03.160Z"
+  },
+  {
+    "id": "cmli3s8wm002f2xpzcnaetj9i",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_GAME",
+    "details": "Created game Internacional vs Palmeiras",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-11T14:06:27.095Z"
+  },
+  {
+    "id": "cmli3rlwz002b2xpz3q0i6ss4",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_GAME",
+    "details": "Created game Corinthians vs Red Bull Bragantino",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-11T14:05:57.300Z"
+  },
+  {
+    "id": "cmli3r2wr00272xpzwltv2lmm",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_GAME",
+    "details": "Created game Fluminense vs Botafogo-RJ",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-11T14:05:32.667Z"
+  },
+  {
+    "id": "cmli3qnyd00232xpzm9k0b92v",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_GAME",
+    "details": "Created game Atlético-PR vs Santos",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-11T14:05:13.285Z"
+  },
+  {
+    "id": "cmli3q8d1001z2xpz32v31btx",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_GAME",
+    "details": "Created game São Paulo vs Grêmio",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-11T14:04:53.077Z"
+  },
+  {
+    "id": "cmli3pt5y001v2xpzpi6xzt72",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_GAME",
+    "details": "Created game Vasco vs Bahia",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-11T14:04:33.383Z"
+  },
+  {
+    "id": "cmli3pdwt001r2xpz5czke5iu",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_GAME",
+    "details": "Created game Atlético-MG vs Remo",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-11T14:04:13.613Z"
+  },
+  {
+    "id": "cmli3ovud001n2xpz5prvf2jo",
+    "adminId": "cmkxc908l0000113bkpdkgl70",
+    "action": "CREATE_GAME",
+    "details": "Created game Chapecoense vs Coritiba",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "createdAt": "2026-02-11T14:03:50.197Z"
+  }
+]

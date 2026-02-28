@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { signOut } from "next-auth/react";
 import {
     Trophy,
     LogOut,
@@ -39,8 +40,8 @@ export default function DashboardLayout({
                                 key={item.href}
                                 variant={pathname === item.href ? "secondary" : "ghost"}
                                 className={`w-full justify-start transition-all duration-200 ${pathname === item.href
-                                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                                        : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                                    : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
                                     }`}
                                 asChild
                             >
@@ -54,10 +55,12 @@ export default function DashboardLayout({
                 </ScrollArea>
 
                 <div className="p-4 border-t border-sidebar-border bg-black/10">
-                    <Button variant="outline" className="w-full text-red-400 hover:text-red-500 hover:bg-red-500/10 border-red-500/20 backdrop-blur-sm" asChild>
-                        <Link href="/">
-                            <LogOut className="mr-2 h-4 w-4" /> Sair
-                        </Link>
+                    <Button
+                        variant="outline"
+                        className="w-full text-red-400 hover:text-red-500 hover:bg-red-500/10 border-red-500/20 backdrop-blur-sm"
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                    >
+                        <LogOut className="mr-2 h-4 w-4" /> Sair
                     </Button>
                 </div>
             </aside>

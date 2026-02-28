@@ -4,79 +4,59 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Trophy, Users, AlertTriangle, Swords, Skull, Coins, Calendar, UserPlus, CreditCard, Target, Medal, Diamond, Crown, Flame, ArrowRight, User, LogIn } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  const groups = [
-    {
-      name: "Jogo Bronze",
-      subtitle: "Entrada acessível para iniciantes",
-      price: "R$ 10,00",
-      accentColor: "bg-amber-600",
-      textColor: "text-amber-600",
-      lightColor: "bg-amber-50",
-      icon: Medal,
-      rank: "3",
-      rankColor: "text-amber-700 bg-amber-200"
+export default async function Home() {
+  const dbGroups = await prisma.group.findMany({
+    where: {
+      name: {
+        in: ["Jogo Bronze", "Jogo Prata", "Jogo Ouro"]
+      }
     },
-    {
-      name: "Jogo Prata",
-      subtitle: "Para jogadores intermediários",
-      price: "R$ 25,00",
-      accentColor: "bg-gray-400",
-      textColor: "text-gray-400",
-      lightColor: "bg-gray-50",
-      icon: Medal,
-      rank: "2",
-      rankColor: "text-gray-600 bg-gray-200"
-    },
-    {
-      name: "Jogo Ouro",
-      subtitle: "Premiação elevada",
-      price: "R$ 50,00",
-      accentColor: "bg-yellow-400",
-      textColor: "text-yellow-500",
-      lightColor: "bg-yellow-50",
-      icon: Medal,
-      rank: "1",
-      rankColor: "text-yellow-700 bg-yellow-200"
-    },
-    {
-      name: "Jogo Diamante",
-      subtitle: "Para jogadores experientes",
-      price: "R$ 100,00",
-      accentColor: "bg-cyan-300",
-      textColor: "text-cyan-400",
-      lightColor: "bg-cyan-50",
-      icon: Diamond,
-      rank: null,
-      rankColor: "text-cyan-600"
-    },
-    {
-      name: "Jogo Elite",
-      subtitle: "Premiação exclusiva",
-      price: "R$ 500,00",
-      accentColor: "bg-purple-600",
-      textColor: "text-purple-600",
-      lightColor: "bg-purple-50",
-      icon: Crown,
-      rank: null,
-      rankColor: "text-purple-600" // Custom for crown
-    },
-    {
-      name: "Jogo Lendário",
-      subtitle: "A maior premiação do campeonato",
-      price: "R$ 1.000,00",
-      accentColor: "bg-orange-600",
-      textColor: "text-orange-600",
-      lightColor: "bg-orange-50",
-      icon: Flame,
-      rank: null,
-      rankColor: "text-orange-600"
-    },
-  ];
+    orderBy: { entryFee: 'asc' }
+  });
+
+  const getGroupIcon = (name: string) => {
+    if (name.includes("Bronze")) return Medal;
+    if (name.includes("Prata")) return Medal;
+    if (name.includes("Ouro")) return Medal;
+    return Trophy;
+  };
+
+  const getGroupColors = (name: string) => {
+    if (name.includes("Bronze")) return { accent: "bg-amber-600", text: "text-amber-600", light: "bg-amber-50", rank: "3", rankColor: "text-amber-700 bg-amber-200" };
+    if (name.includes("Prata")) return { accent: "bg-gray-400", text: "text-gray-400", light: "bg-gray-50", rank: "2", rankColor: "text-gray-600 bg-gray-200" };
+    if (name.includes("Ouro")) return { accent: "bg-yellow-400", text: "text-yellow-500", light: "bg-yellow-50", rank: "1", rankColor: "text-yellow-700 bg-yellow-200" };
+    return { accent: "bg-green-600", text: "text-green-600", light: "bg-green-50", rank: null, rankColor: "text-green-600" };
+  };
+
+  const getSubtitle = (name: string) => {
+    if (name.includes("Bronze")) return "Entrada acessível para iniciantes";
+    if (name.includes("Prata")) return "Para jogadores intermediários";
+    if (name.includes("Ouro")) return "Premiação elevada";
+    return "Participe e vença";
+  };
+
+  const groups = dbGroups.map(g => {
+    const colors = getGroupColors(g.name);
+    return {
+      id: g.id,
+      name: g.name,
+      subtitle: getSubtitle(g.name),
+      price: "Jogo recreativo - Fase de testes",
+      accentColor: colors.accent,
+      textColor: colors.text,
+      lightColor: colors.light,
+      icon: getGroupIcon(g.name),
+      rank: colors.rank,
+      rankColor: colors.rankColor
+    };
+  });
+
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <main className="min-h-screen bg-white flex flex-col">
       {/* Hero Section */}
       <header className="relative w-full pt-20 pb-32 overflow-hidden flex flex-col items-center justify-center text-center px-4 bg-pitch shadow-inner">
         {/* Login Button */}
@@ -103,7 +83,7 @@ export default function Home() {
         </div>
 
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-yellow-200 to-yellow-500 mb-4 drop-shadow-sm">
-          Apenas um Sobreviverá
+          Você será capaz de sobreviver até o final ?
         </h1>
         <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-8 font-medium">
           O desafio definitivo do Brasileirão. Escolha seu time, sobreviva às rodadas e conquiste a glória eterna.
@@ -133,8 +113,8 @@ export default function Home() {
             <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-6">
               <Coins className="w-8 h-8 text-green-600" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900">Premiação Real</h3>
-            <p className="text-gray-600 mt-2 max-w-xs">87.5% de tudo o que for arrecadado vai para o grande campeão.</p>
+            <h3 className="text-2xl font-bold text-gray-900">Fase de Testes</h3>
+            <p className="text-gray-600 mt-2 max-w-xs">Participe gratuitamente durante este período experimental.</p>
           </div>
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-6">
@@ -185,7 +165,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Escolha um Grupo</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Selecione o grupo de jogo que deseja participar e efetue o pagamento.
+                Selecione o grupo de jogo que deseja participar. Atualmente em fase de testes grátis.
               </p>
             </div>
 
@@ -225,59 +205,62 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {groups.map((group) => (
-              <div key={group.name} className={`bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 flex flex-col hover:-translate-y-1 transition-transform duration-300 group`}>
-                {/* Top Border Accent */}
-                <div className={`h-2 w-full ${group.accentColor}`} />
+            {groups.map((group) => {
+              const Icon = group.icon;
+              return (
+                <div key={group.id} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 flex flex-col hover:-translate-y-1 transition-transform duration-300 group">
+                  {/* Top Border Accent */}
+                  <div className={`h-2 w-full ${group.accentColor}`} />
 
-                <div className="p-6 flex flex-col flex-grow">
-                  {/* Header: Rank/Icon and Price */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="relative">
-                      {group.rank ? (
-                        <div className="relative">
-                          <group.icon className={`w-10 h-10 ${group.name === 'Jogo Prata' ? 'text-gray-400' : group.name === 'Jogo Bronze' ? 'text-amber-600' : 'text-yellow-400'}`} />
-                          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] text-xs font-bold text-white drop-shadow-md">{group.rank}</span>
-                        </div>
-                      ) : (
-                        <group.icon className={`w-10 h-10 ${group.textColor}`} />
-                      )}
+                  <div className="p-6 flex flex-col flex-grow">
+                    {/* Header: Rank/Icon and Price */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="relative">
+                        {group.rank ? (
+                          <div className="relative">
+                            <Icon className={`w-10 h-10 ${group.name === 'Jogo Prata' ? 'text-gray-400' : group.name === 'Jogo Bronze' ? 'text-amber-600' : 'text-yellow-400'}`} />
+                            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] text-xs font-bold text-white drop-shadow-md">{group.rank}</span>
+                          </div>
+                        ) : (
+                          <Icon className={`w-10 h-10 ${group.textColor}`} />
+                        )}
+                      </div>
+                      <div className={`px-4 py-1.5 rounded-full font-bold text-sm ${group.lightColor} ${group.textColor}`}>
+                        {group.price}
+                      </div>
                     </div>
-                    <div className={`px-4 py-1.5 rounded-full font-bold text-sm ${group.lightColor} ${group.textColor}`}>
-                      {group.price}
-                    </div>
-                  </div>
 
-                  {/* Title and Subtitle */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{group.name}</h3>
-                  <p className="text-gray-500 text-sm mb-6">{group.subtitle}</p>
+                    {/* Title and Subtitle */}
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">{group.name}</h3>
+                    <p className="text-gray-500 text-sm mb-6">{group.subtitle}</p>
 
-                  {/* Participants and Prize */}
-                  <div className="flex justify-between items-center text-sm text-gray-500 mb-8 mt-auto">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      <span>0 participantes</span>
+                    {/* Participants and Prize */}
+                    <div className="flex justify-between items-center text-sm text-gray-500 mb-8 mt-auto">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        <span>0 participantes</span>
+                      </div>
+                      <div className="flex items-center gap-2 font-semibold text-green-600">
+                        <Trophy className="w-4 h-4" />
+                        <span>Fase de Testes</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 font-semibold text-green-600">
-                      <Trophy className="w-4 h-4" />
-                      <span>R$ 0,00</span>
-                    </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="space-y-3">
-                    <Button className={`w-full ${group.accentColor} hover:opacity-90 text-white font-bold h-12 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`} asChild>
-                      <Link href="/register">
-                        Participar <ArrowRight className="w-4 h-4" />
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" className="w-full text-gray-900 font-medium h-10 hover:bg-gray-50 rounded-lg">
-                      Ver detalhes
-                    </Button>
+                    {/* Actions */}
+                    <div className="space-y-3">
+                      <Button className={`w-full ${group.accentColor} hover:opacity-90 text-white font-bold h-12 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`} asChild>
+                        <Link href={`/register?groupId=${group.id}`}>
+                          Participar <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" className="w-full text-gray-900 font-medium h-10 hover:bg-gray-50 rounded-lg">
+                        Ver detalhes
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -302,7 +285,7 @@ export default function Home() {
               { label: "Rodadas", value: "19", icon: Calendar },
               { label: "Times", value: "20", icon: Shield },
               { label: "Arenas", value: "6", icon: Trophy },
-              { label: "Prêmio", value: "87.5%", icon: Coins },
+              { label: "Prêmio", value: "Testes", icon: Coins },
             ].map((stat, i) => (
               <div key={i} className="bg-green-950/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 text-center">
                 <stat.icon className="w-8 h-8 text-yellow-500 mx-auto mb-4" />
@@ -331,6 +314,6 @@ export default function Home() {
           </p>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }

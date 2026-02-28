@@ -26,7 +26,7 @@ export default async function GamesPage(props: PageProps) {
     const games = currentRoundId ? await getGamesByRound(currentRoundId) : [];
 
     return (
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto px-4 pb-20">
             <GameManager
                 rounds={rounds}
                 games={games}

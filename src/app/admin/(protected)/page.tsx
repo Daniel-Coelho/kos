@@ -11,12 +11,6 @@ async function getDashboardStats() {
         where: { status: "ALIVE" }
     });
 
-    const totalPrizePool = await prisma.group.aggregate({
-        _sum: {
-            prizePool: true
-        }
-    });
-
     const groups = await prisma.group.findMany({
         include: {
             _count: {
@@ -25,11 +19,21 @@ async function getDashboardStats() {
         }
     });
 
+    const groupsWithCollection = groups.map(group => {
+        const collection = Number(group.entryFee) * group._count.participations;
+        return {
+            ...group,
+            collection
+        };
+    });
+
+    const totalPrize = groupsWithCollection.reduce((acc, group) => acc + group.collection, 0);
+
     return {
         roundNumber: activeRound?.number || "Pré-Temporada",
         activePlayers,
-        totalPrize: totalPrizePool._sum.prizePool || 0,
-        groups
+        totalPrize,
+        groups: groupsWithCollection
     };
 }
 
@@ -38,7 +42,7 @@ export default async function AdminDashboard() {
 
     return (
         <div>
-            <h2 className="text-2xl font-bold mb-6">Dashboard Central</h2>
+            <h2 className="text-2xl font-bold mb-6 text-slate-800">Dashboard Central</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500 flex items-center justify-between">
@@ -59,9 +63,9 @@ export default async function AdminDashboard() {
 
                 <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-500 flex items-center justify-between">
                     <div>
-                        <p className="text-sm text-gray-500 uppercase font-semibold">Premiação Total</p>
+                        <p className="text-sm text-gray-500 uppercase font-semibold">Arrecadação Total</p>
                         <p className="text-3xl font-bold text-gray-800">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(stats.totalPrize))}
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.totalPrize)}
                         </p>
                     </div>
                     <DollarSign className="text-yellow-500 h-8 w-8" />
@@ -77,13 +81,13 @@ export default async function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-semibold mb-4 border-b pb-2">Status dos Grupos</h3>
+                    <h3 className="text-lg font-semibold mb-4 border-b pb-2 text-slate-800">Status dos Grupos</h3>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grupo</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participantes</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Participantes</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Arrecadação</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
@@ -93,8 +97,8 @@ export default async function AdminDashboard() {
                                     <tr key={group.id}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{group.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{group._count.participations}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(group.prizePool))}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(group.collection)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${group.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>

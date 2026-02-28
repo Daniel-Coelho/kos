@@ -29,7 +29,7 @@ export default async function UserDetailPage(props: PageProps) {
                 <h2 className="text-2xl font-bold mb-1">{user.name}</h2>
                 <p className="text-gray-500 mb-4">{user.email} • {user.cpf} • {user.phone}</p>
                 <div className="flex gap-2">
-                    <Badge variant="outline">{user.role}</Badge>
+                    <Badge variant="outline" className="bg-white">{user.role}</Badge>
                     <Badge variant="secondary">{user.nickname}</Badge>
                 </div>
             </div>
@@ -89,7 +89,7 @@ export default async function UserDetailPage(props: PageProps) {
                                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(t.amount))}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                        <Badge variant={t.status === 'COMPLETED' ? "outline" : "destructive"}>{t.status}</Badge>
+                                        <Badge variant={t.status === 'COMPLETED' ? "outline" : "destructive"} className={t.status === 'COMPLETED' ? "bg-white" : ""}>{t.status}</Badge>
                                     </td>
                                 </tr>
                             ))}

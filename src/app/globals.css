@@ -111,6 +111,28 @@
   --sidebar-ring: oklch(0.75 0.18 75);
 }
 
+.light {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.2 0.05 160);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.05 160);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.05 160);
+  --primary: oklch(0.45 0.15 150);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.95 0.02 160);
+  --secondary-foreground: oklch(0.2 0.05 160);
+  --muted: oklch(0.95 0.02 160);
+  --muted-foreground: oklch(0.45 0.05 160);
+  --accent: oklch(0.95 0.02 160);
+  --accent-foreground: oklch(0.2 0.05 160);
+  --destructive: oklch(0.6 0.2 25);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.8 0.04 160);
+  --input: oklch(0.8 0.04 160);
+  --ring: oklch(0.45 0.15 150);
+}
+
 .dark {
   --background: oklch(0.15 0.05 145);
   /* Deep Dark Green */

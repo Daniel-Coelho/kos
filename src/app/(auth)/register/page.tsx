@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -14,10 +14,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
-export default function RegisterPage() {
+const BRAZILIAN_TEAMS = [
+    "ABC", "Amazonas", "América-MG", "Anápolis", "Athletic", "Atlético-GO",
+    "Atletico-MG", "Atlhético-PR", "Avaí", "Bahia", "Barra-SC", "Botafogo-PB",
+    "Botafogo-RJ", "Botafogo-SP", "Brusque", "Caxias", "Ceará", "Chapecoense",
+    "Confiança", "Corinthians", "Coritiba", "CRB", "Cruzeiro", "CSA",
+    "Ferroviária", "Figueirense", "Fortaleza", "Flamengo", "Floresta",
+    "Fluminense", "Goiás", "Guarani", "Grêmio", "Inter de Limeira",
+    "Internacional", "Itabaiana", "Ituano", "Juventude", "Londrina",
+    "Maranhão", "Maringá", "Mirassol", "Náutico", "Novorizontino",
+    "Operário-PR", "Palmeiras", "Paysandu", "Ponte Preta",
+    "Red Bull Bragantino", "Remo", "Sampaio Corrêa", "Santa Cruz", "Santos",
+    "São Bernardo", "São Paulo", "Sport", "Vasco", "Vitória",
+    "Volta Redonda", "Ypiranga-RS"
+].sort();
+
+function RegisterForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const groupId = searchParams.get("groupId");
+
     const [formData, setFormData] = useState({
         name: "",
         cpf: "",
@@ -66,7 +91,13 @@ export default function RegisterPage() {
                 description: "Faça login para continuar.",
             });
 
-            router.push("/login");
+            // Redirect flow
+            if (groupId) {
+                const callbackUrl = encodeURIComponent(`/dashboard/join?groupId=${groupId}&checkout=true`);
+                router.push(`/login?callbackUrl=${callbackUrl}`);
+            } else {
+                router.push("/login");
+            }
 
         } catch (error: any) {
             toast.error("Erro no cadastro", {
@@ -122,7 +153,26 @@ export default function RegisterPage() {
 
                         <div className="grid gap-2">
                             <Label htmlFor="team">Time do Coração</Label>
-                            <Input id="team" placeholder="Time" required value={formData.team} onChange={handleChange} />
+                            <Select
+                                value={formData.team}
+                                onValueChange={(value) => setFormData({ ...formData, team: value })}
+                                required
+                            >
+                                <SelectTrigger id="team" className="w-full bg-white text-black border-input">
+                                    <SelectValue placeholder="Selecione seu time" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white border-input">
+                                    {BRAZILIAN_TEAMS.map((team) => (
+                                        <SelectItem
+                                            key={team}
+                                            value={team}
+                                            className="text-black focus:bg-yellow-500 focus:text-white cursor-pointer"
+                                        >
+                                            {team}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 
@@ -137,11 +187,19 @@ export default function RegisterPage() {
                 </form>
                 <div className="mt-4 text-center text-sm">
                     Já tem uma conta?{" "}
-                    <Link href="/login" className="underline text-yellow-500">
+                    <Link href={`/login${groupId ? `?callbackUrl=${encodeURIComponent(`/dashboard/join?groupId=${groupId}&checkout=true`)}` : ''}`} className="underline text-yellow-500">
                         Fazer login
                     </Link>
                 </div>
             </CardContent>
         </Card>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={<div>Carregando...</div>}>
+            <RegisterForm />
+        </Suspense>
     );
 }

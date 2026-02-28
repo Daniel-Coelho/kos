@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner"; // Assuming sonner is installed as per package.json
 // import { loadStripe } from "@stripe/stripe-js"; // We might handle redirection server-side or via URL
 
@@ -10,10 +10,12 @@ interface CheckoutButtonProps {
     priceId: string | null;
     groupName: string;
     price: number;
+    autoCheckout?: boolean;
 }
 
-export function CheckoutButton({ groupId, priceId, groupName, price }: CheckoutButtonProps) {
+export function CheckoutButton({ groupId, priceId, groupName, price, autoCheckout }: CheckoutButtonProps) {
     const [loading, setLoading] = useState(false);
+    const hasAutoCheckedOut = useRef(false);
 
     const handleCheckout = async () => {
         if (!priceId) {
@@ -26,30 +28,10 @@ export function CheckoutButton({ groupId, priceId, groupName, price }: CheckoutB
         setLoading(true);
 
         try {
-            const response = await fetch("/api/checkout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    priceId: priceId,
-                    groupId: groupId,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                const errorMsg = data.error || "Erro ao iniciar pagamento";
-                throw new Error(errorMsg);
-            }
-
-            // Redirect to Stripe Checkout URL
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                throw new Error("URL de pagamento não encontrada");
-            }
+            // Bypass payment and redirect to dashboard with success and groupId
+            // This leverages the auto-activation logic in src/app/(dashboard)/dashboard/page.tsx
+            const successUrl = `/dashboard?success=true&groupId=${groupId}`;
+            window.location.href = successUrl;
 
         } catch (error: any) {
             console.error(error);
@@ -60,13 +42,23 @@ export function CheckoutButton({ groupId, priceId, groupName, price }: CheckoutB
         }
     };
 
+    useEffect(() => {
+        if (autoCheckout && !hasAutoCheckedOut.current) {
+            hasAutoCheckedOut.current = true;
+            toast.info("Processando participação...", {
+                description: "Aguarde um instante."
+            });
+            handleCheckout();
+        }
+    }, [autoCheckout]);
+
     return (
         <Button
             className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
             onClick={handleCheckout}
             disabled={loading}
         >
-            {loading ? "Processando..." : `Entrar por R$ ${price.toFixed(2)}`}
+            {loading ? "Processando..." : "Participar (Fase de Testes)"}
         </Button>
     );
 }

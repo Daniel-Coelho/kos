@@ -25,6 +25,16 @@ export async function POST(request: Request) {
             }
         }
 
+        // --- ROUND 9 LIMIT ---
+        const round9 = await prisma.round.findFirst({ where: { number: 9 } });
+        if (round9 && (round9.status === "LOCKED" || round9.status === "COMPLETED")) {
+            return NextResponse.json(
+                { error: "As inscrições para este campeonato estão encerradas (Prazo: Rodada 9)." },
+                { status: 403 }
+            );
+        }
+        // ---------------------
+
         const result = registerSchema.safeParse(body);
 
         if (!result.success) {

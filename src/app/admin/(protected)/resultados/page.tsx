@@ -13,13 +13,15 @@ export default async function ResultsPage(props: PageProps) {
 
     // Default to first round if none selected
     if (!currentRoundId && rounds.length > 0) {
-        // Try to find open or scheduled round closest to now? 
-        // Or just the first one. 
-        // For results, maybe we want the most recent 'LOCKED' round or active round.
-        const openRound = rounds.find(r => r.status === "OPEN" || r.status === "LOCKED");
-        if (openRound) {
-            currentRoundId = openRound.id;
+        // Try to find open or locked round (next to be processed)
+        // Or just the first one that is NOT completed.
+        const activeRound = rounds.find(r => r.status === "OPEN" || r.status === "LOCKED");
+        if (activeRound) {
+            currentRoundId = activeRound.id;
         } else {
+            // If all completed, maybe show the last one? 
+            // The prompt says "proxima rodada para eu lançar os resultados".
+            // If all are completed, we default to the first one available.
             currentRoundId = rounds[0].id;
         }
     }

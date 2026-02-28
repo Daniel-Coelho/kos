@@ -9,7 +9,7 @@ async function main() {
         { name: 'Jogo Ouro', entryFee: 50.00, stripePriceId: 'price_1SnKQB9maI1fl5PRULfTPeiT' },
         { name: 'Jogo Diamante', entryFee: 100.00, stripePriceId: 'price_1Sto419maI1fl5PRLvYjorG6' },
         { name: 'Jogo Elite', entryFee: 500.00, stripePriceId: 'price_1Sto4s9maI1fl5PRJb8rgUgI' },
-        { name: 'Jogo Master', entryFee: 1000.00, stripePriceId: 'price_1Sto5L9maI1fl5PRUNvXyrai' },
+        { name: 'Jogo Lendário', entryFee: 1000.00, stripePriceId: 'price_1Sto5L9maI1fl5PRUNvXyrai' },
     ]
 
     console.log('Seeding groups with Stripe Price IDs...')

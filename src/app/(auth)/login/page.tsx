@@ -17,8 +17,14 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function LoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl");
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -42,7 +48,7 @@ export default function LoginPage() {
                 toast.success("Login realizado!", {
                     description: "Redirecionando..."
                 });
-                router.push("/dashboard");
+                router.push(callbackUrl || "/dashboard");
                 router.refresh();
             }
         } catch (error) {
@@ -77,7 +83,7 @@ export default function LoginPage() {
                         <div className="grid gap-2">
                             <div className="flex items-center">
                                 <Label htmlFor="password">Senha</Label>
-                                <Link href="#" className="ml-auto inline-block text-sm underline text-muted-foreground">
+                                <Link href="/forgot-password" title="Esqueci minha senha" className="ml-auto inline-block text-sm underline text-muted-foreground hover:text-yellow-600 transition-colors">
                                     Esqueceu a senha?
                                 </Link>
                             </div>
@@ -101,5 +107,13 @@ export default function LoginPage() {
                 </div>
             </CardContent>
         </Card>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Carregando...</div>}>
+            <LoginForm />
+        </Suspense>
     );
 }

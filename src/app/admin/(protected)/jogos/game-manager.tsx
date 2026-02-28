@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
@@ -26,7 +25,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Calendar, Clock, Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type MatchWithClubs = Match & { homeClub: Club | null, awayClub: Club | null };
 
@@ -44,8 +44,6 @@ export default function GameManager({
     const router = useRouter();
     const [isCreateGameOpen, setIsCreateGameOpen] = useState(false);
     const [editingGame, setEditingGame] = useState<MatchWithClubs | null>(null);
-
-    // Round Management
     const [isCreateRoundOpen, setIsCreateRoundOpen] = useState(false);
 
     function handleRoundChange(roundId: string) {
@@ -96,177 +94,176 @@ export default function GameManager({
         }
     }
 
-    async function handleLockRound(roundId: string, status: string) {
-        try {
-            await updateRoundStatus(roundId, status);
-            toast.success(`Rodada ${status === 'LOCKED' ? 'Bloqueada' : 'Aberta'}!`);
-        } catch (error) {
-            toast.error("Erro ao atualizar status da rodada");
-        }
-    }
-
     const currentRound = rounds.find(r => r.id === currentRoundId);
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="space-y-10 max-w-4xl mx-auto py-4">
+            {/* Header Section */}
+            <div className="flex justify-between items-start">
                 <div>
-                    <h2 className="text-2xl font-bold">Gerenciar Jogos e Rodadas</h2>
-                    <p className="text-gray-500">Agende os jogos de cada rodada.</p>
+                    <h1 className="text-2xl font-bold text-slate-800">Gerenciar Jogos e Rodadas</h1>
+                    <p className="text-slate-500 text-sm mt-1">Agende os jogos de cada rodada.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Dialog open={isCreateRoundOpen} onOpenChange={setIsCreateRoundOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline"><Plus className="w-4 h-4 mr-2" /> Nova Rodada</Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Criar Nova Rodada</DialogTitle>
-                            </DialogHeader>
-                            <form action={handleCreateRound}>
-                                <div className="grid gap-4 py-4">
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="round-number">Número da Rodada</Label>
-                                        <Input id="round-number" name="number" type="number" required min={1} max={38} />
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="round-deadline">Deadline (Limite Palpites)</Label>
-                                        <Input id="round-deadline" name="deadline" type="datetime-local" required />
-                                    </div>
+                <Dialog open={isCreateRoundOpen} onOpenChange={setIsCreateRoundOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="bg-[#15803d] hover:bg-[#166534] text-white rounded-lg px-6 font-semibold shadow-sm transition-all hover:scale-[1.02]">
+                            <Plus className="w-4 h-4 mr-2" /> Nova Rodada
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Criar Nova Rodada</DialogTitle>
+                        </DialogHeader>
+                        <form action={handleCreateRound}>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="round-number">Número da Rodada</Label>
+                                    <Input id="round-number" name="number" type="number" required min={1} max={38} />
                                 </div>
-                                <DialogFooter>
-                                    <Button type="submit">Criar Rodada</Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
-                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="round-deadline">Deadline (Limite Palpites)</Label>
+                                    <Input id="round-deadline" name="deadline" type="datetime-local" required />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit">Criar Rodada</Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </div>
 
-            {/* Round Selector */}
-            <div className="flex overflow-x-auto pb-4 gap-2">
+            {/* Round Pills Navigation */}
+            <div className="flex flex-wrap gap-3">
                 {rounds.map((round) => (
                     <button
                         key={round.id}
                         onClick={() => handleRoundChange(round.id)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${currentRoundId === round.id
-                            ? "bg-blue-600 text-white"
-                            : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
-                            }`}
+                        className={cn(
+                            "px-5 py-2.5 rounded-full text-xs font-bold transition-all border shadow-sm flex items-center gap-2",
+                            currentRoundId === round.id
+                                ? "bg-[#2563eb] text-white border-[#2563eb]"
+                                : "bg-white text-slate-400 border-slate-100 hover:border-slate-300"
+                        )}
                     >
                         Rodada {round.number}
-                        <span className={`ml-2 text-xs opacity-75`}>
-                            ({round.status})
-                        </span>
+                        <span className="opacity-60 font-medium">({round.status})</span>
                     </button>
                 ))}
             </div>
 
             {currentRoundId ? (
-                <div className="bg-white rounded-lg shadow p-6">
-                    <div className="flex justify-between items-center mb-6 border-b pb-4">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    {/* Interior Card Header */}
+                    <div className="p-8 pb-6 flex justify-between items-center">
                         <div>
-                            <h3 className="text-lg font-bold">Rodada {currentRound?.number}</h3>
-                            <p className="text-sm text-gray-500">
+                            <h2 className="text-xl font-bold text-slate-800">Rodada {currentRound?.number}</h2>
+                            <p className="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wider">
                                 Deadline: {currentRound?.deadline ? format(new Date(currentRound.deadline), "dd/MM/yyyy HH:mm", { locale: ptBR }) : '-'}
                             </p>
                         </div>
-                        <div className="flex gap-2">
-                            {currentRound?.status === 'OPEN' && (
-                                <Button size="sm" variant="destructive" onClick={() => handleLockRound(currentRoundId, 'LOCKED')}>
-                                    Bloquear Palpites
+                        <Dialog open={isCreateGameOpen} onOpenChange={setIsCreateGameOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="bg-[#15803d] hover:bg-[#166534] text-white rounded-lg px-6 font-semibold shadow-sm text-sm">
+                                    <Plus className="w-4 h-4 mr-2" /> Agendar Jogo
                                 </Button>
-                            )}
-                            {currentRound?.status === 'LOCKED' && (
-                                <Button size="sm" variant="outline" onClick={() => handleLockRound(currentRoundId, 'OPEN')}>
-                                    Reabrir Palpites
-                                </Button>
-                            )}
-
-                            <Dialog open={isCreateGameOpen} onOpenChange={setIsCreateGameOpen}>
-                                <DialogTrigger asChild>
-                                    <Button className="bg-green-600 hover:bg-green-700 text-white">
-                                        <Plus className="w-4 h-4 mr-2" /> Agendar Jogo
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Agendar Jogo - R{currentRound?.number}</DialogTitle>
-                                    </DialogHeader>
-                                    <form action={handleCreateGame}>
-                                        <div className="grid gap-4 py-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="grid gap-2">
-                                                    <Label>Mandante</Label>
-                                                    <Select name="homeClubId" required>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Selecione..." />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {clubs.map(c => (
-                                                                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="grid gap-2">
-                                                    <Label>Visitante</Label>
-                                                    <Select name="awayClubId" required>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Selecione..." />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {clubs.map(c => (
-                                                                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Agendar Jogo - Rodada {currentRound?.number}</DialogTitle>
+                                </DialogHeader>
+                                <form action={handleCreateGame}>
+                                    <div className="grid gap-4 py-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid gap-2">
+                                                <Label>Mandante</Label>
+                                                <Select name="homeClubId" required>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Selecione..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {clubs.map(c => (
+                                                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                             <div className="grid gap-2">
-                                                <Label>Data e Hora</Label>
-                                                <Input name="startTime" type="datetime-local" required />
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <Label>Estádio (Opcional)</Label>
-                                                <Input name="stadium" placeholder="Ex: Maracanã" />
+                                                <Label>Visitante</Label>
+                                                <Select name="awayClubId" required>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Selecione..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {clubs.map(c => (
+                                                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                         </div>
-                                        <DialogFooter>
-                                            <Button type="submit">Agendar</Button>
-                                        </DialogFooter>
-                                    </form>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
+                                        <div className="grid gap-2">
+                                            <Label>Data e Hora</Label>
+                                            <Input name="startTime" type="datetime-local" required />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label>Estádio (Opcional)</Label>
+                                            <Input name="stadium" placeholder="Ex: Maracanã" />
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button type="submit">Agendar</Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
                     </div>
 
-                    <div className="space-y-4">
+                    {/* Matches List */}
+                    <div className="px-4 pb-8 space-y-1">
                         {games.length === 0 ? (
-                            <p className="text-center text-gray-500 py-8">Nenhum jogo agendado para esta rodada.</p>
+                            <div className="text-center py-12 text-slate-400 bg-slate-50/50 rounded-xl mx-4">
+                                <p className="text-sm font-medium">Nenhum jogo agendado para esta rodada.</p>
+                            </div>
                         ) : (
                             games.map((game) => (
-                                <div key={game.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-                                    <div className="flex-1 flex items-center justify-end gap-3 text-right">
-                                        <span className="font-bold text-gray-900">{game.homeTeam}</span>
-                                        {game.homeClub?.logoUrl && <img src={game.homeClub.logoUrl} className="w-8 h-8 object-contain" alt="" />}
+                                <div key={game.id} className="group relative flex items-center py-4 px-6 hover:bg-slate-50/50 transition-all rounded-xl border border-transparent hover:border-slate-100">
+                                    <div className="flex-1 flex items-center justify-end gap-5">
+                                        <span className="font-bold text-slate-700 text-sm whitespace-nowrap">{game.homeTeam}</span>
+                                        <div className="w-10 h-10 flex items-center justify-center p-1 bg-white rounded-full shadow-sm border border-slate-100">
+                                            {game.homeClub?.logoUrl ? (
+                                                <img src={game.homeClub.logoUrl} className="w-7 h-7 object-contain" alt="" />
+                                            ) : (
+                                                <div className="w-7 h-7 bg-slate-100 rounded-full" />
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="px-6 flex flex-col items-center">
-                                        <span className="text-xs text-gray-500 font-bold uppercase">X</span>
-                                        <span className="text-xs text-gray-400 mt-1">
+
+                                    <div className="w-32 flex flex-col items-center">
+                                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">X</span>
+                                        <span className="text-[10px] text-slate-400 font-bold mt-1">
                                             {format(new Date(game.startTime), "dd/MM HH:mm", { locale: ptBR })}
                                         </span>
                                     </div>
-                                    <div className="flex-1 flex items-center justify-start gap-3 text-left">
-                                        {game.awayClub?.logoUrl && <img src={game.awayClub.logoUrl} className="w-8 h-8 object-contain" alt="" />}
-                                        <span className="font-bold text-gray-900">{game.awayTeam}</span>
+
+                                    <div className="flex-1 flex items-center justify-start gap-5">
+                                        <div className="w-10 h-10 flex items-center justify-center p-1 bg-white rounded-full shadow-sm border border-slate-100">
+                                            {game.awayClub?.logoUrl ? (
+                                                <img src={game.awayClub.logoUrl} className="w-7 h-7 object-contain" alt="" />
+                                            ) : (
+                                                <div className="w-7 h-7 bg-slate-100 rounded-full" />
+                                            )}
+                                        </div>
+                                        <span className="font-bold text-slate-700 text-sm whitespace-nowrap">{game.awayTeam}</span>
                                     </div>
-                                    <div className="ml-6 flex gap-2">
-                                        <Button variant="ghost" size="icon" onClick={() => setEditingGame(game)}>
-                                            <Pencil className="w-4 h-4 text-gray-500" />
+
+                                    {/* Action Buttons Overlay */}
+                                    <div className="flex gap-1 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white" onClick={() => setEditingGame(game)}>
+                                            <Pencil className="w-3.5 h-3.5 text-slate-400" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => handleDeleteGame(game.id)}>
-                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-red-50" onClick={() => handleDeleteGame(game.id)}>
+                                            <Trash2 className="w-3.5 h-3.5 text-red-400" />
                                         </Button>
                                     </div>
                                 </div>
@@ -275,15 +272,12 @@ export default function GameManager({
                     </div>
                 </div>
             ) : (
-                <div className="text-center py-12 bg-white rounded-lg shadow">
-                    <p className="text-gray-500">Selecione ou crie uma rodada para gerenciar os jogos.</p>
-                    <Button className="mt-4" variant="outline" onClick={() => setIsCreateRoundOpen(true)}>
-                        Criar Primeira Rodada
-                    </Button>
+                <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-100">
+                    <p className="text-slate-500 font-medium">Crie sua primeira rodada para começar a agendar jogos.</p>
                 </div>
             )}
 
-            {/* Edit Modal (Reusing structure, could be abstracted) */}
+            {/* Edit Game Modal */}
             <Dialog open={!!editingGame} onOpenChange={(open) => !open && setEditingGame(null)}>
                 <DialogContent>
                     <DialogHeader>
@@ -296,9 +290,7 @@ export default function GameManager({
                                     <div className="grid gap-2">
                                         <Label>Mandante</Label>
                                         <Select name="homeClubId" defaultValue={editingGame.homeClubId || ""} required>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
+                                            <SelectTrigger><SelectValue /></SelectTrigger>
                                             <SelectContent>
                                                 {clubs.map(c => (
                                                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -309,9 +301,7 @@ export default function GameManager({
                                     <div className="grid gap-2">
                                         <Label>Visitante</Label>
                                         <Select name="awayClubId" defaultValue={editingGame.awayClubId || ""} required>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
+                                            <SelectTrigger><SelectValue /></SelectTrigger>
                                             <SelectContent>
                                                 {clubs.map(c => (
                                                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -331,11 +321,7 @@ export default function GameManager({
                                 </div>
                                 <div className="grid gap-2">
                                     <Label>Estádio (Opcional)</Label>
-                                    <Input
-                                        name="stadium"
-                                        placeholder="Ex: Maracanã"
-                                        defaultValue={editingGame.stadium || ""}
-                                    />
+                                    <Input name="stadium" defaultValue={editingGame.stadium || ""} />
                                 </div>
                             </div>
                             <DialogFooter>
@@ -348,3 +334,4 @@ export default function GameManager({
         </div>
     );
 }
+

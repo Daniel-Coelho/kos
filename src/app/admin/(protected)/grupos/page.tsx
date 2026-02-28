@@ -5,12 +5,31 @@ import { Eye } from "lucide-react";
 
 export default async function GroupsPage() {
     const groups = await prisma.group.findMany({
+        where: {
+            name: {
+                in: ["Jogo Bronze", "Jogo Prata", "Jogo Ouro"]
+            }
+        },
         include: {
-            _count: {
-                select: { participations: true }
+            participations: {
+                select: {
+                    repescagemUsed: true
+                }
             }
         },
         orderBy: { name: "asc" }
+    });
+
+    const groupsWithCalculatedPrize = groups.map(group => {
+        const totalParticipations = group.participations.length;
+        const totalRepescagens = group.participations.filter(p => p.repescagemUsed).length;
+        const dynamicPrizePool = (totalParticipations + totalRepescagens) * Number(group.entryFee) * 0.875;
+
+        return {
+            ...group,
+            prizePool: dynamicPrizePool,
+            participantsCount: totalParticipations
+        };
     });
 
     return (
@@ -29,7 +48,7 @@ export default async function GroupsPage() {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {groups.map((group) => (
+                        {groupsWithCalculatedPrize.map((group) => (
                             <tr key={group.id}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{group.name}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -37,7 +56,7 @@ export default async function GroupsPage() {
                                         {group.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{group._count.participations}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{group.participantsCount}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(group.entryFee))}
                                 </td>

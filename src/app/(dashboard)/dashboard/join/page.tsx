@@ -9,7 +9,8 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { CheckoutButton } from "@/components/checkout-button";
 
-export default async function JoinGroupPage() {
+export default async function JoinGroupPage(props: { searchParams: Promise<{ groupId?: string; checkout?: string }> }) {
+    const searchParams = await props.searchParams;
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -18,9 +19,16 @@ export default async function JoinGroupPage() {
 
     // @ts-ignore
     const userId = session.user.id;
+    const targetGroupId = searchParams.groupId;
+    const shouldAutoCheckout = searchParams.checkout === 'true';
 
     // Fetch all groups
     const groups = await prisma.group.findMany({
+        where: {
+            name: {
+                in: ["Jogo Bronze", "Jogo Prata", "Jogo Ouro"]
+            }
+        },
         orderBy: { entryFee: 'asc' },
         include: {
             participations: {
@@ -43,9 +51,10 @@ export default async function JoinGroupPage() {
                 {groups.map((group) => {
                     const isParticipating = group.participations.length > 0;
                     const isAlive = isParticipating && group.participations[0].status === 'ALIVE';
+                    const isTargetGroup = group.id === targetGroupId;
 
                     return (
-                        <Card key={group.id} className={`relative flex flex-col ${isParticipating ? 'border-green-500 border-2' : ''}`}>
+                        <Card key={group.id} className={`relative flex flex-col ${isParticipating || isTargetGroup ? 'border-green-500 border-2' : ''}`}>
                             {isParticipating && (
                                 <div className="absolute -top-3 -right-3 bg-green-500 text-white rounded-full p-1">
                                     <Check size={20} />
@@ -57,8 +66,8 @@ export default async function JoinGroupPage() {
                                 <CardDescription>Entrada</CardDescription>
                             </CardHeader>
                             <CardContent className="flex-1 text-center">
-                                <div className="text-4xl font-bold text-yellow-600 mb-6">
-                                    R$ {Number(group.entryFee).toFixed(2)}
+                                <div className="text-2xl font-bold text-yellow-600 mb-6">
+                                    Jogo recreativo - Fase de testes
                                 </div>
                                 <ul className="text-sm space-y-2 text-left mx-auto max-w-[200px] mb-6">
                                     <li className="flex items-center"><Check className="mr-2 h-4 w-4 text-green-500" /> Premiação Acumulada</li>
@@ -77,6 +86,7 @@ export default async function JoinGroupPage() {
                                         priceId={group.stripePriceId}
                                         groupName={group.name}
                                         price={Number(group.entryFee)}
+                                        autoCheckout={shouldAutoCheckout && isTargetGroup}
                                     />
                                 )}
                             </CardFooter>
