@@ -1,4 +1,3 @@
-
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -19,11 +18,13 @@ async function main() {
 
     console.log("Simulating API call with raw CPF:", rawCpf);
 
-    // Simulating the logic added to the API route
     let cpfToSave = rawCpf;
     const cleanCpf = rawCpf.replace(/\D/g, "");
     if (cleanCpf.length === 11) {
-        cpfToSave = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+        cpfToSave = cleanCpf.replace(
+            /(\d{3})(\d{3})(\d{3})(\d{2})/,
+            "$1.$2.$3-$4"
+        );
     }
 
     console.log("CPF to be saved:", cpfToSave);
@@ -46,7 +47,11 @@ async function main() {
             console.log("❌ CPF stored incorrectly:", user.cpf);
         }
     } catch (e) {
-        console.error("❌ Registration failed:", e.message);
+        if (e instanceof Error) {
+            console.error("❌ Registration failed:", e.message);
+        } else {
+            console.error("❌ Registration failed:", e);
+        }
     } finally {
         await prisma.$disconnect();
     }

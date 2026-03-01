@@ -6,16 +6,24 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
+type SessionUser = {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+};
+
 export async function getUserProfile() {
     const session = await getServerSession(authOptions);
-    // @ts-ignore
-    if (!session?.user?.id) {
+
+    const userId = (session?.user as SessionUser | undefined)?.id;
+
+    if (!userId) {
         throw new Error("Não autorizado");
     }
 
     const user = await prisma.user.findUnique({
-        // @ts-ignore
-        where: { id: session.user.id },
+        where: { id: userId },
         select: {
             id: true,
             name: true,
@@ -24,7 +32,7 @@ export async function getUserProfile() {
             nickname: true,
             phone: true,
             role: true,
-        }
+        },
     });
 
     return user;
@@ -37,11 +45,19 @@ export async function updateUserProfile(formData: {
     password?: string;
 }) {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+
+    const userId = (session?.user as SessionUser | undefined)?.id;
+
+    if (!userId) {
         throw new Error("Não autorizado");
     }
 
-    const updateData: any = {
+    const updateData: {
+        name: string;
+        nickname: string;
+        phone: string;
+        password?: string;
+    } = {
         name: formData.name,
         nickname: formData.nickname,
         phone: formData.phone,
@@ -52,8 +68,7 @@ export async function updateUserProfile(formData: {
     }
 
     const updatedUser = await prisma.user.update({
-        // @ts-ignore
-        where: { id: session.user.id },
+        where: { id: userId },
         data: updateData,
     });
 

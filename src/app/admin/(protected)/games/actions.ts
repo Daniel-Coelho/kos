@@ -7,42 +7,68 @@ import { logAdminAction } from "@/lib/admin-logger";
 
 const RoundSchema = z.object({
     number: z.coerce.number().min(1, "Número da rodada inválido"),
-    deadline: z.coerce.date({ required_error: "Deadline é obrigatório" }),
+    deadline: z
+        .union([z.string(), z.date()])
+        .transform((val) => new Date(val))
+        .refine((date) => !isNaN(date.getTime()), {
+            message: "Deadline é obrigatório",
+        }),
 });
 
 const MatchSchema = z.object({
     roundId: z.string().min(1, "Rodada é obrigatória"),
     homeClubId: z.string().min(1, "Mandante é obrigatório"),
     awayClubId: z.string().min(1, "Visitante é obrigatório"),
-    startTime: z.coerce.date({ required_error: "Data do jogo é obrigatória" }),
+    startTime: z.coerce
+        .date()
+        .refine((date) => !isNaN(date.getTime()), {
+            message: "Data do jogo é obrigatória",
+        }),
     stadium: z.string().optional(),
 });
 
-export async function createRound(data: z.infer<typeof RoundSchema>) {
+export async function createRound(
+    data: z.input<typeof RoundSchema>
+) {
     const result = RoundSchema.safeParse(data);
+
     if (!result.success) {
-        return { error: result.error.errors[0].message };
+        return {
+            error:
+                result.error.issues?.[0]?.message ??
+                "Erro de validação",
+        };
     }
+
+    const validatedData = result.data;
 
     // Check if round number already exists
     const existing = await prisma.round.findFirst({
-        where: { number: result.data.number },
+        where: { number: validatedData.number },
     });
 
     if (existing) {
-        return { error: `Rodada ${result.data.number} já existe.` };
+        return {
+            error: `Rodada ${validatedData.number} já existe.`,
+        };
     }
 
     try {
         await prisma.round.create({
             data: {
-                number: result.data.number,
-                deadline: result.data.deadline,
+                number: validatedData.number,
+                deadline: validatedData.deadline,
                 status: "SCHEDULED",
             },
         });
-        await logAdminAction("CREATE_ROUND", `Created round: ${result.data.number}`);
+
+        await logAdminAction(
+            "CREATE_ROUND",
+            `Created round: ${validatedData.number}`
+        );
+
         revalidatePath("/admin/games");
+
         return { success: true };
     } catch (error) {
         return { error: "Erro ao criar rodada" };
@@ -52,7 +78,7 @@ export async function createRound(data: z.infer<typeof RoundSchema>) {
 export async function scheduleMatch(data: z.infer<typeof MatchSchema>) {
     const result = MatchSchema.safeParse(data);
     if (!result.success) {
-        return { error: result.error.errors[0].message };
+        return { error: result.error.issues?.[0]?.message ?? "Erro de validação" };
     }
 
     try {

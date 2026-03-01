@@ -13,7 +13,6 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,30 +20,35 @@ import { Label } from "@/components/ui/label";
 import { createRound } from "@/app/admin/(protected)/games/actions";
 
 const RoundSchema = z.object({
-    number: z.coerce.number().min(1),
-    deadline: z.string().min(1, "Deadline é obrigatório"), // Using string for datetime-local input
+    number: z.coerce.number().min(1, "Número deve ser maior que 0"),
+    deadline: z.string().min(1, "Deadline é obrigatório"),
 });
 
 export function CreateRoundDialog() {
     const [open, setOpen] = useState(false);
-    const form = useForm<z.infer<typeof RoundSchema>>({
+
+    const form = useForm<z.input<typeof RoundSchema>>({
         resolver: zodResolver(RoundSchema),
-        defaultValues: { number: 0 },
+        defaultValues: {
+            number: 0,
+            deadline: "",
+        },
     });
 
-    const onSubmit = async (data: z.infer<typeof RoundSchema>) => {
+    const onSubmit = async (data: z.input<typeof RoundSchema>) => {
         const result = await createRound({
             number: data.number,
             deadline: new Date(data.deadline),
         });
 
-        if (result.error) {
+        if (result?.error) {
             toast.error(result.error);
-        } else {
-            toast.success("Rodada criada com sucesso!");
-            setOpen(false);
-            form.reset();
+            return;
         }
+
+        toast.success("Rodada criada com sucesso!");
+        form.reset();
+        setOpen(false);
     };
 
     return (
@@ -55,32 +59,62 @@ export function CreateRoundDialog() {
                     Nova Rodada
                 </Button>
             </DialogTrigger>
+
             <DialogContent className="bg-slate-950 text-white border-slate-800">
                 <DialogHeader>
                     <DialogTitle>Criar Nova Rodada</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4 py-4"
+                >
+                    {/* Número */}
                     <div className="space-y-2">
-                        <Label htmlFor="number" className="text-slate-300">Número da Rodada</Label>
+                        <Label htmlFor="number" className="text-slate-300">
+                            Número da Rodada
+                        </Label>
+
                         <Input
                             id="number"
                             type="number"
-                            {...form.register("number")}
+                            {...form.register("number", {
+                                valueAsNumber: true,
+                            })}
                             className="bg-slate-900 border-green-800 text-white focus:ring-green-600"
                         />
-                        {form.formState.errors.number && <p className="text-red-500 text-sm">{form.formState.errors.number.message}</p>}
+
+                        {form.formState.errors.number && (
+                            <p className="text-red-500 text-sm">
+                                {form.formState.errors.number.message}
+                            </p>
+                        )}
                     </div>
+
+                    {/* Deadline */}
                     <div className="space-y-2">
-                        <Label htmlFor="deadline" className="text-slate-300">Deadline (Limite Palpites)</Label>
+                        <Label htmlFor="deadline" className="text-slate-300">
+                            Deadline (Limite Palpites)
+                        </Label>
+
                         <Input
                             id="deadline"
                             type="datetime-local"
                             {...form.register("deadline")}
                             className="bg-slate-900 border-green-800 text-white focus:ring-green-600"
                         />
-                        {form.formState.errors.deadline && <p className="text-red-500 text-sm">{form.formState.errors.deadline.message}</p>}
+
+                        {form.formState.errors.deadline && (
+                            <p className="text-red-500 text-sm">
+                                {form.formState.errors.deadline.message}
+                            </p>
+                        )}
                     </div>
-                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-bold mt-4">
+
+                    <Button
+                        type="submit"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold mt-4"
+                    >
                         Criar Rodada
                     </Button>
                 </form>

@@ -14,7 +14,7 @@ const ClubSchema = z.object({
 export async function createClub(data: z.infer<typeof ClubSchema>) {
     const result = ClubSchema.safeParse(data);
     if (!result.success) {
-        return { error: result.error.errors[0].message };
+        return { error: result.error.issues?.[0]?.message ?? "Erro de validação" };
     }
 
     try {
@@ -36,7 +36,7 @@ export async function createClub(data: z.infer<typeof ClubSchema>) {
 export async function updateClub(id: string, data: z.infer<typeof ClubSchema>) {
     const result = ClubSchema.safeParse(data);
     if (!result.success) {
-        return { error: result.error.errors[0].message };
+        return { error: result.error.issues?.[0]?.message ?? "Erro de validação" };
     }
 
     try {
